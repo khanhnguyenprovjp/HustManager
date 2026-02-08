@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>HUST Admin Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <img src="hust-logo.png" alt="HUST Logo">
+            <h2>HỆ THỐNG QUẢN LÝ ĐÀO TẠO</h2>
+        </div>
+
+        <div id="loginForm" class="form-box">
+            <h3>ĐĂNG NHẬP HỆ THỐNG</h3>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="loginUser" placeholder="Tên tài khoản">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPass" placeholder="Mật khẩu">
+            </div>
+            <button onclick="handleLogin()" class="btn-submit">Đăng nhập</button>
+        </div>
+
+        <div id="mainDashboard" style="display:none;">
+            <div class="dashboard-header">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="welcomeText">Xin chào...</span>
+                </div>
+                <button onclick="handleLogout()" class="btn-logout">Đăng xuất</button>
+            </div>
+
+            <div id="adminPanel" style="display:none;">
+                <div class="admin-tabs">
+                    <button onclick="showAdminTab('createTeacher')">1. DS Giảng viên</button>
+                    <button onclick="showAdminTab('createStudent')">2. DS Sinh viên</button>
+                    <button onclick="showAdminTab('createClass')">3. Phân công Lớp</button>
+                </div>
+
+                <div id="tabCreateTeacher" class="admin-view">
+                    <h4><i class="fas fa-chalkboard-teacher"></i> Nhập liệu Giảng viên</h4>
+                    <table class="input-table">
+                        <thead>
+                            <tr><th>Mã GV</th><th>Họ và Tên</th><th>Mã Môn (CM)</th><th>Tên Môn (CM)</th><th>Tài khoản</th><th>Mật khẩu</th><th>Xóa</th></tr>
+                        </thead>
+                        <tbody id="teacherTableBody"></tbody>
+                    </table>
+                    <div class="action-bar"><button onclick="addRow('TEACHER')" class="btn-add-row">+ Thêm</button><button onclick="saveList('TEACHER')" class="btn-save-all">Lưu DS GV</button></div>
+                </div>
+
+                <div id="tabCreateStudent" class="admin-view" style="display:none;">
+                    <h4><i class="fas fa-user-graduate"></i> Nhập liệu Sinh viên</h4>
+                    <table class="input-table">
+                        <thead>
+                            <tr><th>MSSV</th><th>Họ và Tên</th><th>Mã Lớp (HC)</th><th>Tài khoản</th><th>Mật khẩu</th><th>Xóa</th></tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                    <div class="action-bar"><button onclick="addRow('STUDENT')" class="btn-add-row">+ Thêm</button><button onclick="saveList('STUDENT')" class="btn-save-all">Lưu DS SV</button></div>
+                </div>
+
+                <div id="tabCreateClass" class="admin-view" style="display:none;">
+                    <h4><i class="fas fa-layer-group"></i> Phân công Lớp học phần</h4>
+                    <table class="input-table">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">Mã GV</th>
+                                <th style="width:10%">Mã Môn</th>
+                                <th style="width:25%">Tên Môn Học</th>
+                                <th style="width:10%">Mã Lớp (HP)</th>
+                                <th style="width:20%">Tên Lớp (Mô tả)</th>
+                                <th style="width:5%">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classTableBody"></tbody>
+                    </table>
+                    <div class="action-bar">
+                        <button onclick="addRow('CLASS')" class="btn-add-row">+ Thêm</button><button onclick="saveList('CLASS')" class="btn-save-all">Lưu DS Lớp</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teacherView" style="display:none;">
+                <div class="teacher-layout">
+                    <div class="left-panel">
+                        <h3 class="section-title">Lớp học phần phụ trách</h3>
+                        <div id="classGrid" class="grid-container"></div>
+                    </div>
+                    <div class="right-panel">
+                        <h3 class="section-title"><i class="fas fa-envelope-open-text"></i> Hộp thư Phúc khảo</h3>
+                        <p style="font-size:0.9em; color:#666;">* Nhấn "Trả lời" để gửi phản hồi cho SV.</p>
+                        <div id="reviewBox" class="review-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="studentView" style="display:none;">
+                <h3 class="section-title">Bảng điểm cá nhân</h3>
+                <div class="table-responsive">
+                    <table class="hust-table student-grade-table">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">Mã Môn</th>
+                                <th style="width:20%">Tên Môn Học</th>
+                                <th style="width:10%">Lớp (HP)</th>
+                                <th style="width:5%">QT</th>
+                                <th style="width:5%">CK</th>
+                                <th style="width:5%">Tổng</th>
+                                <th style="width:15%">GV Giảng dạy</th>
+                                <th style="width:15%">Phản hồi từ GV</th>
+                                <th style="width:15%">Gửi thắc mắc (24h/lần)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentResultBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="gradeModal" class="modal">
+                <div class="modal-content large-modal">
+                    <span class="close-btn" onclick="closeGradeModal()">&times;</span>
+                    <h2 id="modalClassName">Nhập điểm</h2>
+                    <div class="grade-input-box">
+                        <input type="text" id="inputMSSV" placeholder="Nhập Mã Sinh Viên">
+                        <input type="number" id="inputQT" placeholder="Điểm QT">
+                        <input type="number" id="inputCK" placeholder="Điểm CK">
+                        <button onclick="saveGrade()" class="btn-save-grade">Lưu</button>
+                    </div>
+                    <table class="hust-table">
+                        <thead><tr><th>MSSV</th><th>Họ tên</th><th>QT</th><th>CK</th><th>Tổng</th><th>Chữ</th><th>Xóa</th></tr></thead>
+                        <tbody id="gradeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
